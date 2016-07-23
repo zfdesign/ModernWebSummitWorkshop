@@ -4,7 +4,7 @@
 //
 // self.addEventListener('install', (e)=>{ log('Service Worker: Installed'); });
 // self.addEventListener('activate',(e)=>{ log('Service Worker: Active'); });
-// self.addEventListener('fetch',   (e)=>{ log('Service Worker: Fetch'); });
+//self.addEventListener('fetch',   (e)=>{ log('Service Worker: Fetch', e); });
 
 var version = '1';
 var cacheName = 'weatherPWA-v' + version;
@@ -28,7 +28,7 @@ self.addEventListener('install', (e) => {
   );
 });
 
-
+// Clear cach on Activate
 self.addEventListener('activate', (e) => {
   console.log('[ServiceWorker] Activate');
   e.waitUntil(
@@ -39,6 +39,17 @@ self.addEventListener('activate', (e) => {
           return caches.delete(key);
         }
       }));
+    })
+  );
+});
+
+
+// Fetch
+self.addEventListener('fetch', (e) => {
+  console.log('[ServiceWorker] Fetch', e.request.url);
+  e.respondWith(
+    caches.match(e.request).then((response) => {
+      return response || fetch(e.request);
     })
   );
 });
