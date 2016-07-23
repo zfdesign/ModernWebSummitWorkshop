@@ -28,6 +28,7 @@ self.addEventListener('install', (e) => {
   );
 });
 
+
 // Clear cach on Activate
 self.addEventListener('activate', (e) => {
   console.log('[ServiceWorker] Activate');
@@ -44,12 +45,41 @@ self.addEventListener('activate', (e) => {
 });
 
 
-// Fetch
+// // Fetch
+// self.addEventListener('fetch', (e) => {
+//   console.log('[ServiceWorker] Fetch', e.request.url);
+//   e.respondWith(
+//     caches.match(e.request).then((response) => {
+//       return response || fetch(e.request);
+//     })
+//   );
+// });
+
+
+// Programming Caching Strategies
+var dataCacheName = 'weatherData-v' + version;
+
 self.addEventListener('fetch', (e) => {
   console.log('[ServiceWorker] Fetch', e.request.url);
-  e.respondWith(
-    caches.match(e.request).then((response) => {
-      return response || fetch(e.request);
-    })
-  );
+  // Match requests for data and handle them separately
+  if (e.request.url.indexOf('data/') != -1) {
+
+    e.respondWith(
+      fetch(e.request)
+        .then((response) => {
+          return caches.open(dataCacheName).then((cache) => {
+            cache.put(e.request.url, response.clone());
+            console.log('[ServiceWorker] Fetched & Cached', e.request.url);
+            return response.clone();
+          });
+        })
+    );
+  } else {
+    // The code we saw earlier
+    e.respondWith(
+      caches.match(e.request).then((response) => {
+        return response || fetch(e.request);
+      })
+    );
+  }
 });
