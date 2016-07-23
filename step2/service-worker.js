@@ -56,8 +56,9 @@ self.addEventListener('activate', (e) => {
 // });
 
 
+
+var dataCacheName = 'weatherData-v' + version;
 // Programming Caching Strategies
-// var dataCacheName = 'weatherData-v' + version;
 // self.addEventListener('fetch', (e) => {
 //   console.log('[ServiceWorker] Fetch', e.request.url);
 //   // Match requests for data and handle them separately
