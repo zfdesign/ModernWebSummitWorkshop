@@ -17,12 +17,28 @@ var appShellFilesToCache = [
   './images/ic_notifications_white_24px.svg'
 ];
 
+
 self.addEventListener('install', (e) => {
   console.log('[ServiceWorker] Install');
   e.waitUntil(
     caches.open(cacheName).then((cache) => {
       console.log('[ServiceWorker] Caching App Shell');
       return cache.addAll(appShellFilesToCache);
+    })
+  );
+});
+
+
+self.addEventListener('activate', (e) => {
+  console.log('[ServiceWorker] Activate');
+  e.waitUntil(
+    caches.keys().then((keyList) => {
+      return Promise.all(keyList.map((key) => {
+        console.log('[ServiceWorker] Removing old cache', key);
+        if (key !== cacheName) {
+          return caches.delete(key);
+        }
+      }));
     })
   );
 });
