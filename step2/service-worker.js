@@ -57,22 +57,49 @@ self.addEventListener('activate', (e) => {
 
 
 // Programming Caching Strategies
-var dataCacheName = 'weatherData-v' + version;
+// var dataCacheName = 'weatherData-v' + version;
+// self.addEventListener('fetch', (e) => {
+//   console.log('[ServiceWorker] Fetch', e.request.url);
+//   // Match requests for data and handle them separately
+//   if (e.request.url.indexOf('data/') != -1) {
+//
+//     e.respondWith(
+//       fetch(e.request)
+//         .then((response) => {
+//           return caches.open(dataCacheName).then((cache) => {
+//             cache.put(e.request.url, response.clone());
+//             console.log('[ServiceWorker] Fetched & Cached', e.request.url);
+//             return response.clone();
+//           });
+//         })
+//     );
+//   } else {
+//     // The code we saw earlier
+//     e.respondWith(
+//       caches.match(e.request).then((response) => {
+//         return response || fetch(e.request);
+//       })
+//     );
+//   }
+// });
 
+
+// Read-through cache-first variant
+// The cache-first version
 self.addEventListener('fetch', (e) => {
   console.log('[ServiceWorker] Fetch', e.request.url);
   // Match requests for data and handle them separately
   if (e.request.url.indexOf('data/') != -1) {
-
     e.respondWith(
-      fetch(e.request)
-        .then((response) => {
+      caches.match(e.request.clone()).then((response) => {
+        return response || fetch(e.request.clone()).then((r2) => {
           return caches.open(dataCacheName).then((cache) => {
-            cache.put(e.request.url, response.clone());
             console.log('[ServiceWorker] Fetched & Cached', e.request.url);
-            return response.clone();
+            cache.put(e.request.url, r2.clone());
+            return  r2.clone();
           });
-        })
+        });
+      })
     );
   } else {
     // The code we saw earlier
